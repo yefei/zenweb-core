@@ -9,6 +9,7 @@ export declare class Core {
   defineContextCacheProperty(prop: string | number | symbol, get: (ctx: Koa.Context) => any): void;
   check(mod: string): Core;
   setup(mod: string | setupCallback, options?: any, name?: string): Core;
+  setupAfter(callback: () => any | Promise<any>): Core;
   boot(): Promise<void>;
   listen(port?: number): void;
   start(port?: number): void;
