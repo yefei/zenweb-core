@@ -1,6 +1,6 @@
 import * as Koa from 'koa';
 
-export type setupCallback = (core: Core, options?: any) => Promise<void>;
+export type setupCallback = (core: Core, option: any) => Promise<void>;
 
 export interface CoreOptions {
   /**
@@ -38,10 +38,10 @@ export interface CoreOptions {
 export declare class Core {
   constructor(options?: CoreOptions);
   koa: Koa;
-  loaded: string[];
+  loaded: { mod: setupCallback, name: string, option: any }[];
   defineContextCacheProperty(prop: string | number | symbol, get: (ctx: Koa.Context) => any): void;
-  check(mod: string): Core;
-  setup(mod: string | setupCallback, options?: any, name?: string): Core;
+  check(name: string): Core;
+  setup(mod: string | setupCallback, option?: any, name?: string): Core;
   setupAfter(callback: () => any | Promise<any>): Core;
   boot(): Promise<void>;
   listen(port?: number): void;
