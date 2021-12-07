@@ -1,6 +1,6 @@
 {
   "name": "@zenweb/core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Zenweb Core module",
   "type": "module",
   "exports": "./index.js",
@@ -10,6 +10,7 @@
   "typings": "index.d.ts",
   "files": [
     "lib",
+    "index.js",
     "index.d.ts"
   ],
   "scripts": {
