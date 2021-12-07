@@ -1,4 +1,4 @@
-import * as Koa from 'koa';
+import Koa from 'koa';
 
 export type setupCallback = (core: Core, option: any) => Promise<void>;
 
@@ -43,6 +43,7 @@ export declare class Core {
   check(name: string): Core;
   setup(mod: string | setupCallback, option?: any, name?: string): Core;
   setupAfter(callback: () => any | Promise<any>): Core;
+  use(middleware: Koa.Middleware): Core;
   boot(): Promise<void>;
   listen(port?: number): void;
   start(port?: number): void;
