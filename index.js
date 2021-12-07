@@ -1,5 +1,1 @@
-import Core from './lib/core.js';
-
-export {
-  Core,
-};
+export { default as Core } from './lib/core.js';
