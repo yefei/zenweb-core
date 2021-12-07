@@ -1,7 +1,5 @@
-'use strict';
+import Core from './lib/core.js';
 
-const Core = require('./lib/core');
-
-module.exports = {
+export {
   Core,
 };
