@@ -1,19 +1,15 @@
 {
   "name": "@zenweb/core",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Zenweb Core module",
   "type": "module",
-  "exports": "./index.js",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "typings": "index.d.ts",
+  "exports": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "files": [
-    "lib",
-    "index.js",
-    "index.d.ts"
+    "dist"
   ],
   "scripts": {
+    "prepublishOnly": "tsc",
     "dev": "cd example && cross-env DEBUG=* node app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -37,6 +33,8 @@
     "url": "https://github.com/yefei/zenweb-core/issues"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "@types/koa": "^2.13.4",
     "@zenweb/api": "^1.2.0",
     "cross-env": "^7.0.3",
     "eslint": "^7.16.0"
