@@ -46,7 +46,7 @@ export class Core {
    * @param prop 属性名称
    * @param get 第一次访问时回调
    */
-  defineContextCacheProperty(prop: PropertyKey, get: (ctx: Koa.BaseContext) => any) {
+  defineContextCacheProperty(prop: PropertyKey, get: (ctx: Koa.Context) => any) {
     const CACHE = Symbol('zenweb#contextCacheProperty');
     Object.defineProperty(this.koa.context, prop, {
       get() {
