@@ -1,6 +1,7 @@
-import assert from 'node:assert';
+import * as assert from 'assert';
 import Debug from 'debug';
-import Koa from 'koa';
+import * as Koa from 'koa';
+import { CoreOptions, LoadedModule, SetupAfterFunction, SetupFunction } from './types';
 
 const debug = Debug('zenweb:core');
 const KOA = Symbol('zenweb#koa');
@@ -8,18 +9,19 @@ const LOADED = Symbol('zenweb#loaded');
 const START_TIME = Symbol('zenweb#startTime');
 const SETUP_AFTER = Symbol('zenweb#setupAfter');
 
-export default class Core {
-  constructor(options) {
-    this[START_TIME] = Date.now();
+export class Core {
+  [START_TIME]: number = Date.now();
+  [KOA]: Koa;
+  [LOADED]: LoadedModule[] = [];
+  [SETUP_AFTER]: SetupAfterFunction[] = [];
+
+  constructor(options?: CoreOptions) {
     this[KOA] = new Koa(options);
-    this[LOADED] = [];
-    this[SETUP_AFTER] = [];
     this._init();
   }
 
   /**
    * 取得KOA实例
-   * @returns {Koa}
    */
   get koa() {
     return this[KOA];
@@ -27,7 +29,6 @@ export default class Core {
 
   /**
    * 取得已载入模块列表
-   * @returns {{ mod: string, name: string, option: any }[]}
    */
   get loaded() {
     return this[LOADED];
@@ -35,18 +36,17 @@ export default class Core {
 
   /**
    * 初始化
-   * @private
    */
-  _init() {
+  private _init() {
     Object.defineProperty(this.koa.context, 'core', { value: this });
   }
 
   /**
    * 在 KOA.Context 中定义属性并缓存，当第一次调用属性时执行 get 方法，之后不再调用 get
-   * @param {string|number|symbol} prop 属性名称
-   * @param {function(Koa.Context)} get 第一次访问时回调
+   * @param prop 属性名称
+   * @param get 第一次访问时回调
    */
-  defineContextCacheProperty(prop, get) {
+  defineContextCacheProperty(prop: PropertyKey, get: (ctx: Koa.BaseContext) => any) {
     const CACHE = Symbol('zenweb#contextCacheProperty');
     Object.defineProperty(this.koa.context, prop, {
       get() {
@@ -60,66 +60,65 @@ export default class Core {
 
   /**
    * 检查模块是否已经安装，没有安装抛出异常
-   * @param {string} name 模块名
+   * @param name 模块名
    * @throws {Error}
-   * @returns {Core}
    */
-  check(name) {
+  check(name: string) {
     assert(this[LOADED].findIndex(i => i.name === name) > -1, `module [${name}] must be setup`);
     return this;
   }
 
   /**
    * 安装模块
-   * @param {string|((core: Core, option: *) => void)} mod 模块名称或模块引用
-   * @param {*} [option] 模块配置项
-   * @param {string} [name] 模块名称
-   * @returns {Core}
+   * @param nameOrFunction 模块名称或模块安装函数
+   * @param option 模块配置项
+   * @param name 模块名称
    */
-  setup(mod, option, name) {
-    if (typeof mod !== 'string') {
-      name = name || mod.name;
+  setup(nameOrFunction: string | SetupFunction, option?: any, name?: string) {
+    if (typeof nameOrFunction === 'string') {
+      name = name || nameOrFunction;
     } else {
-      name = name || mod;
+      name = name || nameOrFunction.name;
+      var setup = nameOrFunction;
     }
     debug('setup module [%s] option: %o', name, option);
-    this[LOADED].push({ name, mod, option });
+    this[LOADED].push({ name, setup, option });
     return this;
   }
 
   /**
    * 所有模块初始化完成后执行回调
-   * @param {() => any | Promise<any>} callback
    */
-  setupAfter(callback) {
+  setupAfter(callback: SetupAfterFunction) {
     this[SETUP_AFTER].push(callback);
     return this;
   }
 
   /**
    * 初始化模块列表
-   * @private
    */
-  async _setupInit() {
-    for (const { name, mod, option } of this[LOADED]) {
-      let _mod = mod;
-      if (typeof _mod === 'string') {
+  private async _setupInit() {
+    for (const { name, setup, option } of this[LOADED]) {
+      let _setup = setup;
+      if (!_setup) {
         try {
-          _mod = await import(_mod);
+          var mod: { setup: SetupFunction } | SetupFunction = require(name);
         } catch (err) {
           console.error('load module [%s] error: %s', name, err);
           process.exit(1);
         }
       }
-      if (typeof _mod === 'object') {
-        _mod = _mod.setup;
-        if (typeof _mod !== 'function') {
-          console.error('module [%s] miss setup function', name);
-          process.exit(1);
-        }
+      if (typeof mod === 'object') { // module.exports = { setup: SetupFunction }
+        _setup = mod.setup;
+      } else if (typeof mod === 'function') { // module.exports = SetupFunction
+        _setup = mod;
+      }
+      if (typeof _setup !== 'function') {
+        console.error('module [%s] miss setup function', name);
+        process.exit(1);
       }
       try {
-        await _mod(this, option);
+        await _setup(this, option);
       } catch (err) {
         throw new Error(`init module [${name}] error: ${err}`);
       }
@@ -127,15 +126,14 @@ export default class Core {
     }
     // 所有模块初始化完成
     for (const callback of this[SETUP_AFTER]) {
-      await callback.apply(this);
+      await callback(this);
     }
   }
 
   /**
-   * @param {Koa.Middleware} middleware 
-   * @returns 
+   * 使用全局中间件
    */
-  use(middleware) {
+  use(middleware: Koa.Middleware) {
     this.koa.use(middleware);
     return this;
   }
@@ -143,15 +141,14 @@ export default class Core {
   /**
    * 启动所有模块代码
    */
-  async boot() {
-    await this._setupInit();
+  boot() {
+    return this._setupInit();
   }
 
   /**
-   * 监听端口
-   * @param {number} [port=7001] 
+   * 监听端口，默认 7001
    */
-  listen(port) {
+  listen(port?: number) {
     port = port || Number(process.env.PORT) || 7001;
     return this.koa.listen(port, () => {
       console.log(`server on: %s.`, port);
@@ -159,11 +156,10 @@ export default class Core {
   }
 
   /**
-   * 启动应用并监听端口
-   * @param {number} [port] 监听端口
+   * 启动应用
    */
-  start(port) {
-    this.boot().then(() => {
+  start(port?: number) {
+    return this.boot().then(() => {
       console.info('boot time: %o ms', Date.now() - this[START_TIME]);
       return this.listen(port);
     }, err => {
