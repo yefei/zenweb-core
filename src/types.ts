@@ -1,6 +1,6 @@
-import { Core } from "./core";
+import { Core, SetupHelper } from "./core";
 
-export interface CoreOptions {
+export interface CoreOption {
   /**
    * Environment
    * default: development
@@ -33,11 +33,17 @@ export interface CoreOptions {
   maxIpsCount?: number;
 }
 
-export type SetupFunction = (core: Core, option?: any) => void | Promise<void>;
-export type SetupAfterFunction = (core: Core) => void | Promise<void>;
+export type SetupCallbak = (helper: SetupHelper) => void | Promise<void>;
+export type SetupAfterCallbak = () => void | Promise<void>;
 
 export interface LoadedModule {
-  name: string;
-  setup?: SetupFunction;
-  option?: any;
+  /**
+   * 模块安装函数
+   */
+  setup: SetupCallbak;
+
+  /**
+   * 模块初始化位置信息，用于查错
+   */
+  stack: string;
 }
