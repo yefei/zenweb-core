@@ -1,20 +1,25 @@
 import * as Koa from 'koa';
+import Debug, { Debugger } from 'debug';
 import { CoreOption, SetupCallbak, LoadedModule, SetupAfterCallbak } from './types';
 import { getStackLocation } from './util';
 
+const debug = Debug('zenweb:core');
 const KOA = Symbol('zenweb#koa');
 const LOADED = Symbol('zenweb#loaded');
 const START_TIME = Symbol('zenweb#startTime');
 const SETUP_AFTER = Symbol('zenweb#setupAfter');
 const CORE = Symbol('zenweb#core');
-const STACK = Symbol('zenweb#stack');
 
 export class SetupHelper {
   [CORE]: Core;
   [SETUP_AFTER]: SetupAfterCallbak;
+  name: string;
+  debug: Debugger;
 
-  constructor(core: Core) {
+  constructor(core: Core, name: string) {
     this[CORE] = core;
+    this.name = name;
+    this.debug = debug.extend('module:' + name);
   }
 
   /**
@@ -27,7 +32,14 @@ export class SetupHelper {
     if (prop in this[CORE]) {
       throw new Error(`define core property [${String(prop)}] duplicated`);
     }
+    this.debug('defineCoreProperty: %s', prop);
     Object.defineProperty(this[CORE], prop, attributes);
+  }
+
+  private _checkContextPropertyExists(prop: PropertyKey) {
+    if (prop in this[CORE].koa.context) {
+      throw new Error(`define context property [${String(prop)}] duplicated`);
+    }
   }
 
   /**
@@ -37,9 +49,8 @@ export class SetupHelper {
    * @returns 
    */
   defineContextProperty(prop: PropertyKey, attributes: PropertyDescriptor) {
-    if (prop in this[CORE].koa.context) {
-      throw new Error(`define context property [${String(prop)}] duplicated`);
-    }
+    this._checkContextPropertyExists(prop);
+    this.debug('defineContextProperty: %s', prop);
     Object.defineProperty(this[CORE].koa.context, prop, attributes);
   }
 
@@ -49,8 +60,10 @@ export class SetupHelper {
    * @param get 第一次访问时回调
    */
   defineContextCacheProperty(prop: PropertyKey, get: (ctx: Koa.Context) => any) {
+    this._checkContextPropertyExists(prop);
+    this.debug('defineContextCacheProperty: %s', prop);
     const CACHE = Symbol('zenweb#contextCacheProperty');
-    this.defineContextProperty(prop, {
+    Object.defineProperty(this[CORE].koa.context, prop, {
       get() {
         if (this[CACHE] === undefined) {
           this[CACHE] = get(this) || null;
@@ -93,6 +106,7 @@ export class SetupHelper {
    * 使用全局中间件
    */
   middleware(middleware: Koa.Middleware) {
+    this.debug('middleware: %s', middleware.name || '-');
     this[CORE].koa.use(middleware);
   }
 }
@@ -127,7 +141,9 @@ export class Core {
    */
   setup(setup: SetupCallbak) {
     const stack = getStackLocation();
-    this[LOADED].push({ setup, stack });
+    const name = setup.name || stack;
+    debug('module [%s] loaded', name);
+    this[LOADED].push({ setup, stack, name });
     return this;
   }
 
@@ -135,28 +151,32 @@ export class Core {
    * 启动所有模块代码
    */
   async boot() {
-    const setupAfters: { callback: SetupAfterCallbak, stack: string }[] = [];
+    const setupAfters: { callback: SetupAfterCallbak, stack: string, name: string }[] = [];
     // 初始化模块
-    for (const { setup, stack } of this[LOADED]) {
-      const helper = new SetupHelper(this);
+    for (const { setup, stack, name } of this[LOADED]) {
+      const helper = new SetupHelper(this, name);
+      debug('module [%s] setup', name);
       try {
         await setup(helper);
       } catch (err) {
-        console.error(`setup module [${stack}]:`, err);
+        console.error(`module [${setup.name}] (${stack}) setup error:`, err);
         process.exit(1);
       }
       if (helper[SETUP_AFTER]) {
-        setupAfters.push({ callback: helper[SETUP_AFTER], stack });
+        setupAfters.push({ callback: helper[SETUP_AFTER], stack, name });
       }
+      debug('module [%s] setup success', name);
     }
     // 所有模块初始化完成后调用
-    for (const { callback, stack } of setupAfters) {
+    for (const { callback, stack, name } of setupAfters) {
+      debug('module [%s] setup after', name);
       try {
         await callback();
       } catch (err) {
-        console.error(`setup module after [${stack}]:`, err);
+        console.error(`module [${name}] (${stack}) setup after error:`, err);
         process.exit(1);
       }
+      debug('module [%s] setup after success', name);
     }
     return this;
   }

@@ -1,6 +1,10 @@
-import { Core } from './core';
-export { Core } from './core';
+import { Core, SetupHelper } from './core';
 export * from './types';
+
+export {
+  Core,
+  SetupHelper,
+}
 
 declare module 'koa' {
   interface DefaultContext {

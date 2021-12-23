@@ -33,7 +33,7 @@ export interface CoreOption {
   maxIpsCount?: number;
 }
 
-export type SetupCallbak = (helper: SetupHelper) => void | Promise<void>;
+export type SetupCallbak = (setup: SetupHelper) => void | Promise<void>;
 export type SetupAfterCallbak = () => void | Promise<void>;
 
 export interface LoadedModule {
@@ -41,6 +41,11 @@ export interface LoadedModule {
    * 模块安装函数
    */
   setup: SetupCallbak;
+
+  /**
+   * 模块名称
+   */
+  name: string;
 
   /**
    * 模块初始化位置信息，用于查错
