@@ -1,4 +1,4 @@
-import { Core, SetupHelper } from "./core";
+import { SetupHelper } from './core';
 
 export interface CoreOption {
   /**
@@ -33,14 +33,14 @@ export interface CoreOption {
   maxIpsCount?: number;
 }
 
-export type SetupCallbak = (setup: SetupHelper) => void | Promise<void>;
-export type SetupAfterCallbak = () => void | Promise<void>;
+export type SetupFunction = (setup: SetupHelper) => void | Promise<void>;
+export type SetupAfterFunction = () => void | Promise<void>;
 
 export interface LoadedModule {
   /**
    * 模块安装函数
    */
-  setup: SetupCallbak;
+  setup: SetupFunction;
 
   /**
    * 模块名称

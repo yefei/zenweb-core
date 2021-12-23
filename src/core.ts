@@ -1,6 +1,6 @@
 import * as Koa from 'koa';
 import Debug, { Debugger } from 'debug';
-import { CoreOption, SetupCallbak, LoadedModule, SetupAfterCallbak } from './types';
+import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction } from './types';
 import { getStackLocation } from './util';
 
 const debug = Debug('zenweb:core');
@@ -12,7 +12,7 @@ const CORE = Symbol('zenweb#core');
 
 export class SetupHelper {
   [CORE]: Core;
-  [SETUP_AFTER]: SetupAfterCallbak;
+  [SETUP_AFTER]: SetupAfterFunction;
   name: string;
   debug: Debugger;
 
@@ -98,7 +98,7 @@ export class SetupHelper {
   /**
    * 所有模块初始化完成后执行回调
    */
-  after(callback: SetupAfterCallbak) {
+  after(callback: SetupAfterFunction) {
     this[SETUP_AFTER] = callback;
   }
 
@@ -139,7 +139,7 @@ export class Core {
    * 安装模块
    * @param setup 模块模块安装函数
    */
-  setup(setup: SetupCallbak) {
+  setup(setup: SetupFunction) {
     const stack = getStackLocation();
     const name = setup.name || stack;
     debug('module [%s] loaded', name);
@@ -151,7 +151,7 @@ export class Core {
    * 启动所有模块代码
    */
   async boot() {
-    const setupAfters: { callback: SetupAfterCallbak, stack: string, name: string }[] = [];
+    const setupAfters: { callback: SetupAfterFunction, stack: string, name: string }[] = [];
     // 初始化模块
     for (const { setup, stack, name } of this[LOADED]) {
       const helper = new SetupHelper(this, name);
