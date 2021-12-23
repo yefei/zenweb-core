@@ -23,6 +23,13 @@ export class SetupHelper {
   }
 
   /**
+   * 取得Core实例
+   */
+  get core() {
+    return this[CORE];
+  }
+
+  /**
    * 取得KOA实例
    */
   get koa() {
