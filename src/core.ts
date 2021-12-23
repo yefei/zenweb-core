@@ -23,6 +23,13 @@ export class SetupHelper {
   }
 
   /**
+   * 取得KOA实例
+   */
+  get koa() {
+    return this[CORE].koa;
+  }
+
+  /**
    * 定义核心属性
    * @param prop 
    * @param attributes 
