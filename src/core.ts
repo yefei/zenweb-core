@@ -128,7 +128,6 @@ export class Core {
   [START_TIME]: number = Date.now();
   [KOA]: Koa;
   [LOADED]: LoadedModule[] = [];
-  [key: PropertyKey]: any;
 
   constructor(option?: CoreOption) {
     this[KOA] = new Koa(option);
