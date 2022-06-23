@@ -124,6 +124,7 @@ export class SetupHelper {
     this[CORE].koa.use(middleware);
   }
 }
+
 export class Core {
   [START_TIME]: number = Date.now();
   [KOA]: Koa;
