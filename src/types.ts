@@ -1,4 +1,9 @@
+import * as koa from 'koa';
 import { SetupHelper } from './core';
+
+// 统一 Conext 实体并用于注入识别
+export class Context {}
+export interface Context extends koa.Context {}
 
 export interface CoreOption {
   /**

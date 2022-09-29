@@ -1,6 +1,6 @@
 import { Core, SetupHelper } from './core';
 export * from './types';
-export { Next } from 'koa';
+export { Next, Middleware } from 'koa';
 
 export {
   Core,

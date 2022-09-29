@@ -1,6 +1,6 @@
 import * as Koa from 'koa';
 import Debug, { Debugger } from 'debug';
-import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction } from './types';
+import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction, Context } from './types';
 import { getStackLocation } from './util';
 
 const debug = Debug('zenweb:core');
@@ -69,11 +69,11 @@ export class SetupHelper {
   }
 
   /**
-   * 在 KOA.Context 中定义属性并缓存，当第一次调用属性时执行 get 方法，之后不再调用 get
+   * 在 Context 中定义属性并缓存，当第一次调用属性时执行 get 方法，之后不再调用 get
    * @param prop 属性名称
    * @param get 第一次访问时回调
    */
-  defineContextCacheProperty(prop: PropertyKey, get: (ctx: Koa.Context) => any) {
+  defineContextCacheProperty(prop: PropertyKey, get: (ctx: Context) => any) {
     this._checkContextPropertyExists(prop);
     this.debug('defineContextCacheProperty: %s', prop);
     const CACHE = Symbol('zenweb#contextCacheProperty');
