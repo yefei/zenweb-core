@@ -1,6 +1,6 @@
 import * as Koa from 'koa';
 import Debug, { Debugger } from 'debug';
-import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction, Context } from './types';
+import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction, Context, Middleware } from './types';
 import { getStackLocation } from './util';
 
 const debug = Debug('zenweb:core');
@@ -119,7 +119,7 @@ export class SetupHelper {
   /**
    * 使用全局中间件
    */
-  middleware(middleware: Koa.Middleware) {
+  middleware(middleware: Middleware) {
     this.debug('middleware: %s', middleware.name || '-');
     this[CORE].koa.use(middleware);
   }
