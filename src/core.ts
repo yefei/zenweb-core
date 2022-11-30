@@ -1,4 +1,5 @@
 import * as Koa from 'koa';
+import * as http from 'http';
 import Debug, { Debugger } from 'debug';
 import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction, Context, Middleware } from './types';
 import { getStackLocation } from './util';
@@ -9,6 +10,7 @@ const LOADED = Symbol('zenweb#loaded');
 const START_TIME = Symbol('zenweb#startTime');
 const SETUP_AFTER = Symbol('zenweb#setupAfter');
 const CORE = Symbol('zenweb#core');
+const SERVER = Symbol('zenweb#server');
 
 export class SetupHelper {
   [CORE]: Core;
@@ -129,9 +131,11 @@ export class Core {
   [START_TIME]: number = Date.now();
   [KOA]: Koa;
   [LOADED]: LoadedModule[] = [];
+  [SERVER]: http.Server;
 
   constructor(option?: CoreOption) {
     this[KOA] = new Koa(option);
+    this[SERVER] = http.createServer(this[KOA].callback());
     this._init();
   }
 
@@ -140,6 +144,13 @@ export class Core {
    */
   get koa() {
     return this[KOA];
+  }
+
+  /**
+   * 取得 http.Server 实例
+   */
+  get server() {
+    return this[SERVER];
   }
 
   /**
@@ -200,7 +211,7 @@ export class Core {
    */
   listen(port?: number) {
     port = port || Number(process.env.PORT) || 7001;
-    return this.koa.listen(port, () => {
+    return this[SERVER].listen(port, () => {
       console.log(`server on: %s.`, port);
     });
   }
