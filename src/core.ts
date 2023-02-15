@@ -4,7 +4,7 @@ import Debug, { Debugger } from 'debug';
 import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction, Context, Middleware } from './types';
 import { getStackLocation } from './util';
 
-const debug = Debug('zenweb:core');
+const debug = Debug('zenweb');
 const KOA = Symbol('zenweb#koa');
 const LOADED = Symbol('zenweb#loaded');
 const START_TIME = Symbol('zenweb#startTime');
@@ -21,7 +21,7 @@ export class SetupHelper {
   constructor(core: Core, name: string) {
     this[CORE] = core;
     this.name = name;
-    this.debug = debug.extend('module:' + name);
+    this.debug = debug.extend(name);
   }
 
   /**
