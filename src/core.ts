@@ -132,8 +132,10 @@ export class Core {
   [KOA]: Koa;
   [LOADED]: LoadedModule[] = [];
   [SERVER]: http.Server;
+  debug: Debugger;
 
   constructor(option?: CoreOption) {
+    this.debug = debug.extend('core');
     this[KOA] = new Koa(option);
     this[SERVER] = http.createServer(this[KOA].callback());
     this._init();
@@ -165,10 +167,10 @@ export class Core {
    * @param setup 模块模块安装函数
    */
   setup(setup: SetupFunction) {
-    const stack = getStackLocation();
-    const name = setup.name || stack;
-    debug('module [%s] loaded', name);
-    this[LOADED].push({ setup, stack, name });
+    const location = getStackLocation();
+    const name = setup.name || location;
+    this.debug('module [%s] loaded', name);
+    this[LOADED].push({ setup, location, name });
     return this;
   }
 
@@ -176,32 +178,32 @@ export class Core {
    * 启动所有模块代码
    */
   async boot() {
-    const setupAfters: { callback: SetupAfterFunction, stack: string, name: string }[] = [];
+    const setupAfters: { callback: SetupAfterFunction, location: string, name: string }[] = [];
     // 初始化模块
-    for (const { setup, stack, name } of this[LOADED]) {
+    for (const { setup, location, name } of this[LOADED]) {
       const helper = new SetupHelper(this, name);
-      debug('module [%s] setup', name);
+      this.debug('module [%s] setup', name);
       try {
         await setup(helper);
       } catch (err) {
-        console.error(`module [${setup.name}] (${stack}) setup error:`, err);
+        console.error(`module [${setup.name}] (${location}) setup error:`, err);
         process.exit(1);
       }
       if (helper[SETUP_AFTER]) {
-        setupAfters.push({ callback: helper[SETUP_AFTER], stack, name });
+        setupAfters.push({ callback: helper[SETUP_AFTER], location, name });
       }
-      debug('module [%s] setup success', name);
+      this.debug('module [%s] setup success', name);
     }
     // 所有模块初始化完成后调用
-    for (const { callback, stack, name } of setupAfters) {
-      debug('module [%s] setup after', name);
+    for (const { callback, location, name } of setupAfters) {
+      this.debug('module [%s] setup after', name);
       try {
         await callback();
       } catch (err) {
-        console.error(`module [${name}] (${stack}) setup after error:`, err);
+        console.error(`module [${name}] (${location}) setup after error:`, err);
         process.exit(1);
       }
-      debug('module [%s] setup after success', name);
+      this.debug('module [%s] setup after success', name);
     }
     return this;
   }

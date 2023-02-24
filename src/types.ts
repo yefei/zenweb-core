@@ -56,5 +56,5 @@ export interface LoadedModule {
   /**
    * 模块初始化位置信息，用于查错
    */
-  stack: string;
+  location: string;
 }
