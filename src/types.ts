@@ -2,7 +2,11 @@ import * as koa from 'koa';
 import { SetupHelper } from './core';
 
 // 统一 Conext 实体并用于注入识别
-export class Context {}
+export abstract class Context {
+  constructor() {
+    throw new TypeError('Context is used for injection description, cannot be initialized.');
+  }
+}
 export interface Context extends koa.Context {}
 export interface Middleware extends koa.Middleware<koa.DefaultState, Context> {}
 
