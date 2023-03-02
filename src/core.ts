@@ -138,7 +138,7 @@ export class Core {
     this._stopping = true;
 
     console.log(); // blank line
-    console.log('stopping server...');
+    console.log('server stopping...');
     
     // 停止监听
     await this.closeListen().catch(e => console.error('close listen error:', e));
@@ -158,7 +158,6 @@ export class Core {
     }
 
     // 退出
-    console.log('server exit.');
-    process.exit(0);
+    console.log('server stopped');
   }
 }
