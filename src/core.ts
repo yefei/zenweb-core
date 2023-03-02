@@ -158,6 +158,7 @@ export class Core {
     }
 
     // 退出
-    process.exit();
+    console.log('server exit.');
+    process.exit(0);
   }
 }
