@@ -1,3 +1,10 @@
+import Debug from 'debug';
+
+/**
+ * debug
+ */
+export const debug = Debug('zenweb');
+
 /**
  * 取得调用栈中位置信息，例如文件位置
  * @param stackIndex 第几层

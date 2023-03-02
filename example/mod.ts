@@ -15,8 +15,13 @@ export default function (opt?: MyModOption): SetupFunction {
     setup.middleware(function mymiddleware(ctx, next) {
       return next();
     });
-    setup.after(() => {
-      // throw new Error('afdasdasdasd');
-    });
+    // setup.after(() => {
+    //   throw new Error('afdasdasdasd');
+    // });
+    // setup.destroy(() => {
+    //   return new Promise((res) => {
+    //     setTimeout(res, 3000);
+    //   })
+    // });
   }
 }

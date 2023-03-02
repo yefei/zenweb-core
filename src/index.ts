@@ -1,4 +1,5 @@
-import { Core, SetupHelper } from './core';
+import { Core } from './core';
+import { SetupHelper } from './setup';
 export * from './types';
 export { Next } from 'koa';
 

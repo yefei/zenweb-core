@@ -1,5 +1,5 @@
 import * as koa from 'koa';
-import { SetupHelper } from './core';
+import { SetupHelper } from './setup';
 
 // 统一 Conext 实体并用于注入识别
 export abstract class Context {
@@ -45,6 +45,7 @@ export interface CoreOption {
 
 export type SetupFunction = (setup: SetupHelper) => void | Promise<void>;
 export type SetupAfterFunction = () => void | Promise<void>;
+export type SetupDestroyFunction = () => void | Promise<void>;
 
 export interface LoadedModule {
   /**
@@ -53,12 +54,12 @@ export interface LoadedModule {
   setup: SetupFunction;
 
   /**
-   * 模块名称
-   */
-  name: string;
-
-  /**
    * 模块初始化位置信息，用于查错
    */
   location: string;
+
+  /**
+   * setup 助手
+   */
+  helper: SetupHelper;
 }

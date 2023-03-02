@@ -1,131 +1,14 @@
 import * as Koa from 'koa';
 import * as http from 'http';
-import Debug, { Debugger } from 'debug';
-import { CoreOption, LoadedModule, SetupFunction, SetupAfterFunction, Context, Middleware } from './types';
-import { getStackLocation } from './util';
+import { Debugger } from 'debug';
+import { CoreOption, LoadedModule, SetupFunction } from './types';
+import { debug, getStackLocation } from './util';
+import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup';
 
-const debug = Debug('zenweb');
 const KOA = Symbol('zenweb#koa');
 const LOADED = Symbol('zenweb#loaded');
 const START_TIME = Symbol('zenweb#startTime');
-const SETUP_AFTER = Symbol('zenweb#setupAfter');
-const CORE = Symbol('zenweb#core');
 const SERVER = Symbol('zenweb#server');
-
-export class SetupHelper {
-  [CORE]: Core;
-  [SETUP_AFTER]: SetupAfterFunction;
-  name: string;
-  debug: Debugger;
-
-  constructor(core: Core, name: string) {
-    this[CORE] = core;
-    this.name = name;
-    this.debug = debug.extend(name);
-  }
-
-  /**
-   * 取得Core实例
-   */
-  get core() {
-    return this[CORE];
-  }
-
-  /**
-   * 取得KOA实例
-   */
-  get koa() {
-    return this[CORE].koa;
-  }
-
-  /**
-   * 定义核心属性
-   * @param prop 
-   * @param attributes 
-   * @returns 
-   */
-  defineCoreProperty(prop: PropertyKey, attributes: PropertyDescriptor) {
-    if (prop in this[CORE]) {
-      throw new Error(`define core property [${String(prop)}] duplicated`);
-    }
-    this.debug('defineCoreProperty: %s', prop);
-    Object.defineProperty(this[CORE], prop, attributes);
-  }
-
-  private _checkContextPropertyExists(prop: PropertyKey) {
-    if (prop in this[CORE].koa.context) {
-      throw new Error(`define context property [${String(prop)}] duplicated`);
-    }
-  }
-
-  /**
-   * 定义上下文附加属性
-   * @param prop 
-   * @param attributes 
-   * @returns 
-   */
-  defineContextProperty(prop: PropertyKey, attributes: PropertyDescriptor) {
-    this._checkContextPropertyExists(prop);
-    this.debug('defineContextProperty: %s', prop);
-    Object.defineProperty(this[CORE].koa.context, prop, attributes);
-  }
-
-  /**
-   * 在 Context 中定义属性并缓存，当第一次调用属性时执行 get 方法，之后不再调用 get
-   * @param prop 属性名称
-   * @param get 第一次访问时回调
-   */
-  defineContextCacheProperty(prop: PropertyKey, get: (ctx: Context) => any) {
-    this._checkContextPropertyExists(prop);
-    this.debug('defineContextCacheProperty: %s', prop);
-    const CACHE = Symbol('zenweb#contextCacheProperty');
-    Object.defineProperty(this[CORE].koa.context, prop, {
-      get() {
-        if (this[CACHE] === undefined) {
-          this[CACHE] = get(this) || null;
-        }
-        return this[CACHE];
-      }
-    });
-  }
-
-  /**
-   * 检查核心属性是否存在
-   * @param prop 属性名称
-   * @param msg 自定义错误信息
-   */
-  checkCoreProperty(prop: PropertyKey, msg?: string) {
-    if (!(prop in this[CORE])) {
-      throw new Error(msg || `check core property [${String(prop)}] miss`);
-    }
-  }
-
-  /**
-   * 检查上下文属性是否存在
-   * @param prop 属性名称
-   * @param msg 自定义错误信息
-   */
-  checkContextProperty(prop: PropertyKey, msg?: string) {
-    if (!(prop in this[CORE].koa.context)) {
-      throw new Error(msg || `check context property [${String(prop)}] miss`);
-    }
-  }
-
-  /**
-   * 所有模块初始化完成后执行回调
-   */
-  after(callback: SetupAfterFunction) {
-    this[SETUP_AFTER] = callback;
-  }
-
-  /**
-   * 使用全局中间件
-   */
-  middleware(middleware: Middleware) {
-    this.debug('middleware: %s', middleware.name || '-');
-    this[CORE].koa.use(middleware);
-  }
-}
 
 export class Core {
   [START_TIME]: number = Date.now();
@@ -133,6 +16,7 @@ export class Core {
   [LOADED]: LoadedModule[] = [];
   [SERVER]: http.Server;
   debug: Debugger;
+  private _stopping: boolean;
 
   constructor(option?: CoreOption) {
     this.debug = debug.extend('core');
@@ -168,9 +52,8 @@ export class Core {
    */
   setup(setup: SetupFunction) {
     const location = getStackLocation();
-    const name = setup.name || location;
-    this.debug('module [%s] loaded', name);
-    this[LOADED].push({ setup, location, name });
+    this.debug('module [%s] loaded', setup.name || location);
+    this[LOADED].push({ setup, location, helper: new SetupHelper(this, setup.name) });
     return this;
   }
 
@@ -178,32 +61,30 @@ export class Core {
    * 启动所有模块代码
    */
   async boot() {
-    const setupAfters: { callback: SetupAfterFunction, location: string, name: string }[] = [];
     // 初始化模块
-    for (const { setup, location, name } of this[LOADED]) {
-      const helper = new SetupHelper(this, name);
-      this.debug('module [%s] setup', name);
+    for (const { setup, helper, location } of this[LOADED]) {
+      helper.debug('setup');
       try {
         await setup(helper);
       } catch (err) {
-        console.error(`module [${setup.name}] (${location}) setup error:`, err);
+        console.error(`module [${helper.name}] (${location}) setup error:`, err);
         process.exit(1);
       }
-      if (helper[SETUP_AFTER]) {
-        setupAfters.push({ callback: helper[SETUP_AFTER], location, name });
-      }
-      this.debug('module [%s] setup success', name);
+      helper.debug('setup success');
     }
     // 所有模块初始化完成后调用
-    for (const { callback, location, name } of setupAfters) {
-      this.debug('module [%s] setup after', name);
+    for (const { helper, location } of this[LOADED]) {
+      if (!helper[SETUP_AFTER]) {
+        continue;
+      }
+      helper.debug('after');
       try {
-        await callback();
+        await helper[SETUP_AFTER]();
       } catch (err) {
-        console.error(`module [${name}] (${location}) setup after error:`, err);
+        console.error(`module [${helper.name}] (${location}) setup after error:`, err);
         process.exit(1);
       }
-      this.debug('module [%s] setup after success', name);
+      helper.debug('after success');
     }
     return this;
   }
@@ -213,21 +94,70 @@ export class Core {
    */
   listen(port?: number) {
     port = port || Number(process.env.PORT) || 7001;
-    return this[SERVER].listen(port, () => {
-      console.log(`server on: %s.`, port);
+    return new Promise<void>((resolve) => {
+      this.server.listen(port, () => {
+        console.log(`server on: %s`, port);
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * 关闭端口监听
+   */
+  closeListen() {
+    return new Promise<void>((resolve, reject) => {
+      this.server.close((err) => {
+        if (err) return reject(err);
+        resolve();
+      });
     });
   }
 
   /**
    * 启动应用
    */
-  start(port?: number) {
-    return this.boot().then(() => {
-      console.info('boot time: %o ms', Date.now() - this[START_TIME]);
-      return this.listen(port);
-    }, err => {
+  async start(port?: number) {
+    try {
+      await this.boot();
+      console.log('boot time: %o ms', Date.now() - this[START_TIME]);
+      process.on('SIGINT', () => this.stop());
+      process.on('SIGTERM', () => this.stop());
+      await this.listen(port);
+    } catch (err) {
       console.error(err);
       process.exit(1);
-    });
+    }
+  }
+
+  /**
+   * 停止应用
+   */
+  async stop() {
+    if (this._stopping) return;
+    this._stopping = true;
+
+    console.log(); // blank line
+    console.log('stopping server...');
+    
+    // 停止监听
+    await this.closeListen().catch(e => console.error('close listen error:', e));
+
+    // 停止模块
+    for (const { helper, location } of this[LOADED]) {
+      if (!helper[SETUP_DESTROY]) {
+        continue;
+      }
+      helper.debug('destroy');
+      try {
+        await helper[SETUP_DESTROY]();
+        helper.debug('destroy success');
+      } catch (err) {
+        console.error(`module [${helper.name}] (${location}) destroy error:`, err);
+      }
+    }
+
+    // 退出
+    process.exit();
   }
 }
