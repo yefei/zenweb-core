@@ -107,6 +107,9 @@ export class Core {
    */
   closeListen() {
     return new Promise<void>((resolve, reject) => {
+      if (!this.server.listening) {
+        return resolve();
+      }
       this.server.close((err) => {
         if (err) return reject(err);
         resolve();
@@ -121,8 +124,8 @@ export class Core {
     try {
       await this.boot();
       console.log('boot time: %o ms', Date.now() - this[START_TIME]);
-      this._signalReceiver();
       await this.listen(port);
+      this._signalReceiver();
     } catch (err) {
       console.error(err);
       process.exit(1);
@@ -165,12 +168,12 @@ export class Core {
     }
     this._stopping = true;
 
-    console.log('server stopping...');
-    
     // 停止监听
+    console.log('close listen...');
     await this.closeListen().catch(e => console.error('close listen error:', e));
 
     // 停止模块
+    console.log('destroy modules...');
     for (const { helper, location } of this[LOADED].reverse()) {
       if (!helper[SETUP_DESTROY]) {
         continue;
