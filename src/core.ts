@@ -121,8 +121,8 @@ export class Core {
     try {
       await this.boot();
       console.log('boot time: %o ms', Date.now() - this[START_TIME]);
-      process.on('SIGINT', () => this.stop());
-      process.on('SIGTERM', () => this.stop());
+      process.on('SIGINT', signal => this.stop(signal));
+      process.on('SIGTERM', signal => this.stop(signal));
       await this.listen(port);
     } catch (err) {
       console.error(err);
@@ -133,11 +133,12 @@ export class Core {
   /**
    * 停止应用
    */
-  async stop() {
+  async stop(signal?: string | number) {
+    console.log(`\nReceived stop signal: ${signal}`);
+
     if (this._stopping) return;
     this._stopping = true;
 
-    console.log(); // blank line
     console.log('server stopping...');
     
     // 停止监听
@@ -159,5 +160,6 @@ export class Core {
 
     // 退出
     console.log('server stopped');
+    process.exit(0);
   }
 }
