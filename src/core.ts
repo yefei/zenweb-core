@@ -134,16 +134,18 @@ export class Core {
    */
   private _signalReceiver() {
     process.on('SIGTERM', signal => this.stop(signal));
+    process.on('SIGINT', signal => this.stop(signal));
+
     if (process.stdin.isTTY) {
       process.stdin.setRawMode(true);
       process.stdin.on('data', data => {
         if (data[0] === 3) { // Ctrl+C
+          process.stdin.setRawMode(false);
+          process.stdin.destroy();
           this.stop('SIGINT');
         }
       });
       console.log('press Ctrl+C to stop server');
-    } else {
-      process.on('SIGINT', signal => this.stop(signal));
     }
   }
 
@@ -153,7 +155,14 @@ export class Core {
   async stop(signal?: string | number) {
     console.log(`received stop signal: ${signal}`);
 
-    if (this._stopping) return;
+    if (this._stopping) {
+      console.error('force exit');
+      // 再次收到退出信号，走强制退出流程并打印未关闭的资源
+      if ((<any>process).getActiveResourcesInfo) {
+        console.error('active resources:', (<any>process).getActiveResourcesInfo());
+      }
+      process.exit(1);
+    }
     this._stopping = true;
 
     console.log('server stopping...');
@@ -177,6 +186,5 @@ export class Core {
 
     // 退出
     console.log('server stopped');
-    process.exit(0);
   }
 }
