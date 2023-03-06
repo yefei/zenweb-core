@@ -13,15 +13,16 @@ export default function (opt?: MyModOption): SetupFunction {
     // setup.checkCoreProperty('aaaa');
     setup.defineCoreProperty('mymod', { value: 1 });
     setup.middleware(function mymiddleware(ctx, next) {
+      console.log('request:', ctx.path);
       return next();
     });
     // setup.after(() => {
     //   throw new Error('afdasdasdasd');
     // });
-    // setup.destroy(() => {
-    //   return new Promise((res) => {
-    //     setTimeout(res, 3000);
-    //   })
-    // });
+    setup.destroy(() => {
+      return new Promise((res) => {
+        setTimeout(res, 3000);
+      })
+    });
   }
 }

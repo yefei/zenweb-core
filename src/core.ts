@@ -96,7 +96,7 @@ export class Core {
     port = port || Number(process.env.PORT) || 7001;
     return new Promise<void>((resolve) => {
       this.server.listen(port, () => {
-        console.log(`server on: %s`, port);
+        console.log('server on:', port);
         resolve();
       });
     });
@@ -121,8 +121,7 @@ export class Core {
     try {
       await this.boot();
       console.log('boot time: %o ms', Date.now() - this[START_TIME]);
-      process.on('SIGINT', signal => this.stop(signal));
-      process.on('SIGTERM', signal => this.stop(signal));
+      this._signalReceiver();
       await this.listen(port);
     } catch (err) {
       console.error(err);
@@ -131,10 +130,28 @@ export class Core {
   }
 
   /**
+   * 进程型号接收处理
+   */
+  private _signalReceiver() {
+    process.on('SIGTERM', signal => this.stop(signal));
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(true);
+      process.stdin.on('data', data => {
+        if (data[0] === 3) { // Ctrl+C
+          this.stop('SIGINT');
+        }
+      });
+      console.log('press Ctrl+C to stop server');
+    } else {
+      process.on('SIGINT', signal => this.stop(signal));
+    }
+  }
+
+  /**
    * 停止应用
    */
   async stop(signal?: string | number) {
-    console.log(`\nReceived stop signal: ${signal}`);
+    console.log(`received stop signal: ${signal}`);
 
     if (this._stopping) return;
     this._stopping = true;
@@ -145,7 +162,7 @@ export class Core {
     await this.closeListen().catch(e => console.error('close listen error:', e));
 
     // 停止模块
-    for (const { helper, location } of this[LOADED]) {
+    for (const { helper, location } of this[LOADED].reverse()) {
       if (!helper[SETUP_DESTROY]) {
         continue;
       }
