@@ -1,5 +1,6 @@
 import * as Koa from 'koa';
 import * as http from 'http';
+import { hostname } from 'os';
 import { Debugger } from 'debug';
 import { CoreOption, LoadedModule, SetupFunction } from './types';
 import { debug, getStackLocation } from './util';
@@ -37,6 +38,14 @@ export class Core {
    */
   get server() {
     return this[SERVER];
+  }
+
+  /**
+   * 取得应用名称
+   * 获取顺序: env.APP_NAME || hostname
+   */
+  get name() {
+    return process.env.APP_NAME || hostname();
   }
 
   /**
