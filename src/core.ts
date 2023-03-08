@@ -1,58 +1,51 @@
-import * as Koa from 'koa';
-import * as http from 'http';
+import * as Application from 'koa';
+import { Server, createServer } from 'http';
 import { hostname } from 'os';
-import { Debugger } from 'debug';
 import { CoreOption, LoadedModule, SetupFunction } from './types';
 import { debug, getStackLocation } from './util';
 import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup';
 
-const KOA = Symbol('zenweb#koa');
-const LOADED = Symbol('zenweb#loaded');
-const START_TIME = Symbol('zenweb#startTime');
-const SERVER = Symbol('zenweb#server');
-
 export class Core {
-  [START_TIME]: number = Date.now();
-  [KOA]: Koa;
-  [LOADED]: LoadedModule[] = [];
-  [SERVER]: http.Server;
-  debug: Debugger;
-  private _stopping: boolean;
-
-  constructor(option?: CoreOption) {
-    this.debug = debug.extend('core');
-    this[KOA] = new Koa(option);
-    this[SERVER] = http.createServer(this[KOA].callback());
-    this._init();
-  }
-
-  /**
-   * 取得KOA实例
-   */
-  get koa() {
-    return this[KOA];
-  }
-
-  /**
-   * 取得 http.Server 实例
-   */
-  get server() {
-    return this[SERVER];
-  }
-
   /**
    * 取得应用名称
    * 获取顺序: env.APP_NAME || hostname
    */
-  get name() {
-    return process.env.APP_NAME || hostname();
-  }
+  readonly name = process.env.APP_NAME || hostname();
 
   /**
-   * 初始化
+   * 启动时间: 毫秒时间戳
    */
-  private _init() {
-    Object.defineProperty(this.koa.context, 'core', { value: this });
+  readonly startTime: number = Date.now();
+
+  /**
+   * 取得 Koa Application 实例
+   */
+  readonly app: Application;
+
+  /**
+   * 已载入的模块
+   */
+  readonly loadedModules: LoadedModule[] = [];
+
+  /**
+   * 取得 http.Server 实例
+   */
+  readonly server: Server;
+
+  /**
+   * core debug 信息打印
+   */
+  readonly debug = debug.extend('core');
+
+  /**
+   * 应用是否正在停止中
+   */
+  private _stopping: boolean;
+
+  constructor(option?: CoreOption) {
+    this.app = new Application(option);
+    Object.defineProperty(this.app.context, 'core', { value: this });
+    this.server = createServer(this.app.callback());
   }
 
   /**
@@ -62,7 +55,7 @@ export class Core {
   setup(setup: SetupFunction) {
     const location = getStackLocation();
     this.debug('module [%s] loaded', setup.name || location);
-    this[LOADED].push({ setup, location, helper: new SetupHelper(this, setup.name) });
+    this.loadedModules.push({ setup, location, helper: new SetupHelper(this, setup.name) });
     return this;
   }
 
@@ -71,7 +64,7 @@ export class Core {
    */
   async boot() {
     // 初始化模块
-    for (const { setup, helper, location } of this[LOADED]) {
+    for (const { setup, helper, location } of this.loadedModules) {
       helper.debug('setup');
       try {
         await setup(helper);
@@ -82,7 +75,7 @@ export class Core {
       helper.debug('setup success');
     }
     // 所有模块初始化完成后调用
-    for (const { helper, location } of this[LOADED]) {
+    for (const { helper, location } of this.loadedModules) {
       if (!helper[SETUP_AFTER]) {
         continue;
       }
@@ -132,7 +125,7 @@ export class Core {
   async start(port?: number) {
     try {
       await this.boot();
-      console.log('boot time: %o ms', Date.now() - this[START_TIME]);
+      console.log('boot time: %o ms', Date.now() - this.startTime);
       await this.listen(port);
       this._signalReceiver();
     } catch (err) {
@@ -183,7 +176,7 @@ export class Core {
 
     // 停止模块
     console.log('destroy modules...');
-    for (const { helper, location } of this[LOADED].reverse()) {
+    for (const { helper, location } of this.loadedModules.reverse()) {
       if (!helper[SETUP_DESTROY]) {
         continue;
       }

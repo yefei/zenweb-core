@@ -13,16 +13,22 @@ export default function (opt?: MyModOption): SetupFunction {
     // setup.checkCoreProperty('aaaa');
     setup.defineCoreProperty('mymod', { value: 1 });
     setup.middleware(function mymiddleware(ctx, next) {
-      console.log('request:', ctx.path);
+      console.log('request:', ctx.path, 'core prop:', ctx.core.mymod);
       return next();
     });
-    // setup.after(() => {
-    //   throw new Error('afdasdasdasd');
-    // });
+    setup.after(() => {
+      console.log('after');
+    });
     setup.destroy(() => {
       return new Promise((res) => {
-        setTimeout(res, 3000);
+        setTimeout(res, 1000);
       })
     });
+  }
+}
+
+declare module '../src' {
+  interface Core {
+    mymod: number;
   }
 }

@@ -3,36 +3,39 @@ import { Core } from './core';
 import { Context, Middleware, SetupAfterFunction, SetupDestroyFunction } from './types';
 import { debug } from './util';
 
-const CORE = Symbol('zenweb#core');
 export const SETUP_AFTER = Symbol('zenweb#setupAfter');
 export const SETUP_DESTROY = Symbol('zenweb#setupDestroy');
 
 export class SetupHelper {
-  [CORE]: Core;
+  /**
+   * Core 实例
+   */
+  readonly core: Core;
+
   [SETUP_AFTER]: SetupAfterFunction;
   [SETUP_DESTROY]: SetupDestroyFunction;
 
-  name: string;
-  debug: Debugger;
+  /**
+   * 模块名称
+   */
+  readonly name: string;
+
+  /**
+   * 模块命名空间调试信息输出
+   */
+  readonly debug: Debugger;
 
   constructor(core: Core, name: string) {
-    this[CORE] = core;
+    this.core = core;
     this.name = name;
     this.debug = debug.extend(name);
   }
 
   /**
-   * 取得Core实例
+   * 取得 Koa Application 实例
    */
-  get core() {
-    return this[CORE];
-  }
-
-  /**
-   * 取得KOA实例
-   */
-  get koa() {
-    return this[CORE].koa;
+  get app() {
+    return this.core.app;
   }
 
   /**
@@ -42,17 +45,11 @@ export class SetupHelper {
    * @returns 
    */
   defineCoreProperty(prop: PropertyKey, attributes: PropertyDescriptor) {
-    if (prop in this[CORE]) {
+    if (prop in this.core) {
       throw new Error(`define core property [${String(prop)}] duplicated`);
     }
     this.debug('defineCoreProperty: %s', prop);
-    Object.defineProperty(this[CORE], prop, attributes);
-  }
-
-  private _checkContextPropertyExists(prop: PropertyKey) {
-    if (prop in this[CORE].koa.context) {
-      throw new Error(`define context property [${String(prop)}] duplicated`);
-    }
+    Object.defineProperty(this.core, prop, attributes);
   }
 
   /**
@@ -64,7 +61,7 @@ export class SetupHelper {
   defineContextProperty(prop: PropertyKey, attributes: PropertyDescriptor) {
     this._checkContextPropertyExists(prop);
     this.debug('defineContextProperty: %s', prop);
-    Object.defineProperty(this[CORE].koa.context, prop, attributes);
+    Object.defineProperty(this.app.context, prop, attributes);
   }
 
   /**
@@ -76,7 +73,7 @@ export class SetupHelper {
     this._checkContextPropertyExists(prop);
     this.debug('defineContextCacheProperty: %s', prop);
     const CACHE = Symbol('zenweb#contextCacheProperty');
-    Object.defineProperty(this[CORE].koa.context, prop, {
+    Object.defineProperty(this.app.context, prop, {
       get() {
         if (this[CACHE] === undefined) {
           this[CACHE] = get(this) || null;
@@ -86,13 +83,19 @@ export class SetupHelper {
     });
   }
 
+  private _checkContextPropertyExists(prop: PropertyKey) {
+    if (prop in this.app.context) {
+      throw new Error(`define context property [${String(prop)}] duplicated`);
+    }
+  }
+
   /**
    * 检查核心属性是否存在
    * @param prop 属性名称
    * @param msg 自定义错误信息
    */
   checkCoreProperty(prop: PropertyKey, msg?: string) {
-    if (!(prop in this[CORE])) {
+    if (!(prop in this.core)) {
       throw new Error(msg || `check core property [${String(prop)}] miss`);
     }
   }
@@ -103,7 +106,7 @@ export class SetupHelper {
    * @param msg 自定义错误信息
    */
   checkContextProperty(prop: PropertyKey, msg?: string) {
-    if (!(prop in this[CORE].koa.context)) {
+    if (!(prop in this.app.context)) {
       throw new Error(msg || `check context property [${String(prop)}] miss`);
     }
   }
@@ -128,6 +131,6 @@ export class SetupHelper {
    */
   middleware(middleware: Middleware) {
     this.debug('middleware: %s', middleware.name || '-');
-    this[CORE].koa.use(middleware);
+    this.app.use(middleware);
   }
 }
