@@ -5,6 +5,10 @@ import { CoreOption, LoadedModule, SetupFunction } from './types';
 import { debug, getStackLocation } from './util';
 import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup';
 
+export {
+  Application,
+}
+
 export class Core {
   /**
    * 取得应用名称
@@ -40,7 +44,7 @@ export class Core {
   /**
    * 应用是否正在停止中
    */
-  private _stopping: boolean;
+  private _stopping = false;
 
   constructor(option?: CoreOption) {
     this.app = new Application(option);

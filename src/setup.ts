@@ -1,5 +1,5 @@
 import { Debugger } from 'debug';
-import { Core } from './core';
+import { Core, Application } from './core';
 import { Context, Middleware, SetupAfterFunction, SetupDestroyFunction } from './types';
 import { debug } from './util';
 
@@ -11,6 +11,11 @@ export class SetupHelper {
    * Core 实例
    */
   readonly core: Core;
+
+  /**
+   * 取得 Koa Application 实例
+   */
+  readonly app: Application;
 
   [SETUP_AFTER]: SetupAfterFunction;
   [SETUP_DESTROY]: SetupDestroyFunction;
@@ -27,15 +32,9 @@ export class SetupHelper {
 
   constructor(core: Core, name: string) {
     this.core = core;
+    this.app = core.app;
     this.name = name;
     this.debug = debug.extend(name);
-  }
-
-  /**
-   * 取得 Koa Application 实例
-   */
-  get app() {
-    return this.core.app;
   }
 
   /**
