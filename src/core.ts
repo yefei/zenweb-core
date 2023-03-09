@@ -1,13 +1,9 @@
-import * as Application from 'koa';
+import * as koa from 'koa';
 import { Server, createServer } from 'http';
 import { hostname } from 'os';
-import { CoreOption, LoadedModule, SetupFunction } from './types';
+import { Application, CoreOption, LoadedModule, SetupFunction } from './types';
 import { debug, getStackLocation } from './util';
 import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup';
-
-export {
-  Application,
-}
 
 export class Core {
   /**
@@ -22,7 +18,7 @@ export class Core {
   readonly startTime: number = Date.now();
 
   /**
-   * 取得 Koa Application 实例
+   * 取得 Koa 实例
    */
   readonly app: Application;
 
@@ -47,7 +43,7 @@ export class Core {
   private _stopping = false;
 
   constructor(option?: CoreOption) {
-    this.app = new Application(option);
+    this.app = new koa(option);
     Object.defineProperty(this.app.context, 'core', { value: this });
     this.server = createServer(this.app.callback());
   }

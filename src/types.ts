@@ -1,14 +1,40 @@
 import * as koa from 'koa';
+import { Core } from './core';
 import { SetupHelper } from './setup';
 
-// 统一 Conext 实体并用于注入识别
+export type State = koa.DefaultState;
+
+/**
+ * 统一 Conext 实体，用于注入识别
+ */
 export abstract class Context {
   constructor() {
     throw new TypeError('Context is used for injection description, cannot be initialized.');
   }
 }
-export interface Context extends koa.Context {}
-export interface Middleware extends koa.Middleware<koa.DefaultState, Context> {}
+
+/**
+ * Context 不再支持使用 `[key: string]: any` 容易引发运行时 bug，
+ * 让 TS 编译时检查属性必须存在
+ */
+export interface Context extends koa.ParameterizedContext<State, koa.DefaultContextExtends> {
+  core: Core;
+}
+
+/**
+ * 中间件方法
+ */
+export interface Middleware extends koa.Middleware<State, Context> {}
+
+/**
+ * 中间件下一步处理调用
+ */
+export type Next = koa.Next;
+
+/**
+ * koa 应用实例
+ */
+export type Application = koa<State, Context>;
 
 export interface CoreOption {
   /**
