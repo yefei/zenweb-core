@@ -51,12 +51,30 @@ export class Core {
   /**
    * 安装模块
    * @param setup 模块模块安装函数
+   * @param name 自定义模块名称，不指定则取模块内置名称
    */
-  setup(setup: SetupFunction) {
+  setup(setup: SetupFunction, name?: string) {
+    name = name || setup.name;
     const location = getStackLocation();
-    this.debug('module [%s] loaded', setup.name || location);
-    this.loadedModules.push({ setup, location, helper: new SetupHelper(this, setup.name) });
+    if (!name) {
+      throw new Error('Missing module name: ' + location);
+    }
+    this.debug('module [%s] loaded', name);
+    this.loadedModules.push({
+      name,
+      setup,
+      location,
+      helper: new SetupHelper(this, name),
+    });
     return this;
+  }
+
+  /**
+   * 检查模块是否存在
+   * @param name 模块名称
+   */
+  moduleExists(name: string) {
+    return this.loadedModules.findIndex(i => i.name === name) !== -1;
   }
 
   /**
@@ -64,18 +82,18 @@ export class Core {
    */
   async boot() {
     // 初始化模块
-    for (const { setup, helper, location } of this.loadedModules) {
+    for (const { name, setup, helper, location } of this.loadedModules) {
       helper.debug('setup');
       try {
         await setup(helper);
       } catch (err) {
-        console.error(`module [${helper.name}] (${location}) setup error:`, err);
+        console.error(`module [${name}] (${location}) setup error:`, err);
         process.exit(1);
       }
       helper.debug('setup success');
     }
     // 所有模块初始化完成后调用
-    for (const { helper, location } of this.loadedModules) {
+    for (const { name, helper, location } of this.loadedModules) {
       if (!helper[SETUP_AFTER]) {
         continue;
       }
@@ -83,7 +101,7 @@ export class Core {
       try {
         await helper[SETUP_AFTER]();
       } catch (err) {
-        console.error(`module [${helper.name}] (${location}) setup after error:`, err);
+        console.error(`module [${name}] (${location}) setup after error:`, err);
         process.exit(1);
       }
       helper.debug('after success');
@@ -176,7 +194,7 @@ export class Core {
 
     // 停止模块
     console.log('destroy modules...');
-    for (const { helper, location } of this.loadedModules.reverse()) {
+    for (const { name, helper, location } of this.loadedModules.reverse()) {
       if (!helper[SETUP_DESTROY]) {
         continue;
       }
@@ -185,7 +203,7 @@ export class Core {
         await helper[SETUP_DESTROY]();
         helper.debug('destroy success');
       } catch (err) {
-        console.error(`module [${helper.name}] (${location}) destroy error:`, err);
+        console.error(`module [${name}] (${location}) destroy error:`, err);
       }
     }
 

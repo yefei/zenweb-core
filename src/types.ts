@@ -75,6 +75,11 @@ export type SetupDestroyFunction = () => void | Promise<void>;
 
 export interface LoadedModule {
   /**
+   * 模块名称
+   */
+  name: string;
+
+  /**
    * 模块安装函数
    */
   setup: SetupFunction;

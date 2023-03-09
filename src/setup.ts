@@ -89,24 +89,13 @@ export class SetupHelper {
   }
 
   /**
-   * 检查核心属性是否存在
-   * @param prop 属性名称
+   * 检查模块是否存在 - 如果不存在则直接抛出异常
+   * @param name 模块名称
    * @param msg 自定义错误信息
    */
-  checkCoreProperty(prop: PropertyKey, msg?: string) {
-    if (!(prop in this.core)) {
-      throw new Error(msg || `check core property [${String(prop)}] miss`);
-    }
-  }
-
-  /**
-   * 检查上下文属性是否存在
-   * @param prop 属性名称
-   * @param msg 自定义错误信息
-   */
-  checkContextProperty(prop: PropertyKey, msg?: string) {
-    if (!(prop in this.app.context)) {
-      throw new Error(msg || `check context property [${String(prop)}] miss`);
+  assertModuleExists(name: string, msg?: string) {
+    if (!this.core.moduleExists(name)) {
+      throw new Error(msg || `missing module: ${name}`);
     }
   }
 
