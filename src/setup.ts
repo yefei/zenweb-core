@@ -17,8 +17,8 @@ export class SetupHelper {
    */
   readonly app: Application;
 
-  [SETUP_AFTER]: SetupAfterFunction;
-  [SETUP_DESTROY]: SetupDestroyFunction;
+  [SETUP_AFTER]?: SetupAfterFunction;
+  [SETUP_DESTROY]?: SetupDestroyFunction;
 
   /**
    * 模块名称

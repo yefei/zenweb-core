@@ -10,7 +10,7 @@ export const debug = Debug('zenweb');
  * @param stackIndex 第几层
  */
 export function getStackLocation(stackIndex = 3) {
-  const stack = new Error().stack.split('\n')[stackIndex];
+  const stack = new Error().stack?.split('\n')[stackIndex];
   if (stack) {
     // Stack trace format :
     // https://v8.dev/docs/stack-trace-api

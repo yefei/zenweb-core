@@ -1,6 +1,6 @@
 {
   "name": "@zenweb/core",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Zenweb Core module",
   "exports": "./dist/index.js",
   "typings": "./dist/index.d.ts",
