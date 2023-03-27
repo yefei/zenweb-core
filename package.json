@@ -25,7 +25,7 @@
     "koa"
   ],
   "license": "MIT",
-  "homepage": "https://zenweb.vercel.app",
+  "homepage": "https://zenweb.node.ltd",
   "devDependencies": {
     "cross-env": "^7.0.3",
     "rimraf": "^4.1.2",
