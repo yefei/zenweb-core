@@ -7,7 +7,7 @@ export type State = koa.DefaultState;
 /**
  * 统一 Conext 实体，用于注入识别
  */
-export abstract class Context {
+export class Context {
   constructor() {
     throw new TypeError('Context is used for injection description, cannot be initialized.');
   }
