@@ -10,9 +10,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowUnusedLabels": false,
-    "newLine": "lf",
-    "outDir": "./dist"
-  },
-  "exclude": [ "node_modules" ],
-  "include": [ "src/**/*" ]
+    "newLine": "lf"
+  }
 }

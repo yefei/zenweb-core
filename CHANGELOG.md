@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.5.4] - 2023-3-27
+- fix: tsconfig-base
+
 ## 3.5.3
 - tsconfig-base
 - Context remove abstract
