@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.5.5] - 2023-3-27
+- remove: tsconfig-base
+
 ## [3.5.4] - 2023-3-27
 - fix: tsconfig-base
 

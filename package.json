@@ -1,11 +1,10 @@
 {
   "name": "@zenweb/core",
-  "version": "3.5.4",
+  "version": "3.5.5",
   "description": "ZenWeb Core Module - Module loader and Server",
   "exports": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
-    "tsconfig-base.json",
     "dist"
   ],
   "scripts": {
