@@ -1,12 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "ES2019",
-    "lib": [ "ES2019" ],
-    "module": "commonjs",
-    "strict": true,
-    "declaration": true,
-    "outDir": "./dist"
-  },
-  "exclude": [ "node_modules" ],
-  "include": [ "src/**/*" ]
+  "extends": "./tsconfig-base.json"
 }
