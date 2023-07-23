@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.6.0] - 2023-7-23
+- 升级: koa@2.14.2 asyncLocalStorage
+
 ## [3.5.5] - 2023-3-27
 - remove: tsconfig-base
 
