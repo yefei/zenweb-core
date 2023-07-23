@@ -67,6 +67,12 @@ export interface CoreOption {
    * max ips read from proxy ip header, default to 0 (means infinity)
    */
   maxIpsCount?: number;
+
+  /**
+   * 是否启用 asyncLocalStorage
+   * @default false
+   */
+  asyncLocalStorage?: boolean;
 }
 
 export type SetupFunction = (setup: SetupHelper) => void | Promise<void>;
