@@ -1,6 +1,11 @@
-import { SetupFunction } from '../src/index';
+import { SetupFunction, getContext } from '../src/index';
 
 export interface MyModOption {}
+
+function testContext() {
+  const ctx = getContext();
+  console.log('ctx-ip:', ctx?.ip, ctx?.path);
+}
 
 /**
  * 模块安装入口
@@ -11,9 +16,12 @@ export default function (opt?: MyModOption): SetupFunction {
   // 返回函数的名称将作为模块名称显示
   return function mymodname(setup) {
     // setup.checkCoreProperty('aaaa');
+    setup.debug('option:', opt);
     setup.defineCoreProperty('mymod', { value: 1 });
     setup.middleware(function mymiddleware(ctx, next) {
-      console.log('request:', ctx.path, 'core prop:', ctx.core.mymod);
+      // console.log('request:', ctx.path, 'core prop:', ctx.core.mymod);
+      testContext();
+      ctx.body = 'ok';
       return next();
     });
     setup.after(() => {

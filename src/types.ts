@@ -1,3 +1,4 @@
+import type { AsyncLocalStorage } from 'async_hooks';
 import * as koa from 'koa';
 import { Core } from './core';
 import { SetupHelper } from './setup';
@@ -34,7 +35,9 @@ export type Next = koa.Next;
 /**
  * koa 应用实例
  */
-export type Application = koa<State, Context>;
+export interface Application extends koa<State, Context> {
+  ctxStorage?: AsyncLocalStorage<Context>;
+}
 
 export interface CoreOption {
   /**
