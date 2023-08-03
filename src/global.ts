@@ -1,5 +1,5 @@
 import { Core } from './core';
-import { CoreOption, SetupFunction } from './types';
+import { CoreOption } from './types';
 
 const CORE = Symbol.for('zenweb@core');
 
@@ -36,13 +36,4 @@ export function getCore(): Core {
  */
 export function getContext() {
   return getCore().app.ctxStorage?.getStore();
-}
-
-/**
- * 安装模块
- * @param setup 模块模块安装函数
- * @param name 自定义模块名称，不指定则取模块内置名称
- */
-export function setup(setup: SetupFunction, name?: string) {
-  return getCore().setup(setup, name);
 }
