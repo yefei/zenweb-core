@@ -4,11 +4,11 @@ import { CoreOption, SetupFunction } from './types';
 const CORE = Symbol.for('zenweb@core');
 
 /**
- * 创建全局 Core 实例
+ * 初始化全局 Core 实例
  * - 如果实例已经存在则抛出异常
  * - 全局实例默认启用 `asyncLocalStorage`
  */
-export function createCore(opt?: CoreOption) {
+export function initCore(opt?: CoreOption) {
   if (CORE in global) {
     throw new Error('Core instance already exists.');
   }

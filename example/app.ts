@@ -1,6 +1,6 @@
-import { createCore } from '../src/index';
+import { initCore } from '../src/index';
 import mymod from './mod';
 
-createCore()
+initCore()
 .setup(mymod())
 .start();
