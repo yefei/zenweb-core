@@ -1,5 +1,5 @@
 import { Core } from './core';
-import { CoreOption } from './types';
+import { Context, CoreOption } from './types';
 
 const CORE = Symbol.for('zenweb@core');
 
@@ -8,7 +8,7 @@ const CORE = Symbol.for('zenweb@core');
  * - 如果实例已经存在则抛出异常
  * - 全局实例默认启用 `asyncLocalStorage`
  */
-export function initCore(opt?: CoreOption) {
+export function initCore(opt?: CoreOption): Core | never {
   if (CORE in global) {
     throw new Error('Core instance already exists.');
   }
@@ -23,7 +23,7 @@ export function initCore(opt?: CoreOption) {
  * 取得全局 Core 实例
  * - 如果无法取得则抛出异常
  */
-export function getCore(): Core {
+export function getCore(): Core | never {
   if (!(CORE in global)) {
     throw new Error('Core instance not exists.');
   }
@@ -33,7 +33,14 @@ export function getCore(): Core {
 
 /**
  * 取得当前请求上下文
+ * @param force 默认 true 必须取得，如果无法取得则抛出异常
  */
-export function getContext() {
-  return getCore().app.ctxStorage?.getStore();
+export function getContext(force?: true): Context | never;
+export function getContext(force?: false): Context | undefined;
+export function getContext(force = true) {
+  const ctx = getCore().app.ctxStorage?.getStore();
+  if (force && !ctx) {
+    throw new Error('Context instance not exists.');
+  }
+  return ctx;
 }

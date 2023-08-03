@@ -4,7 +4,7 @@ export interface MyModOption {}
 
 function testContext() {
   const ctx = getContext();
-  console.log('ctx-ip:', ctx?.ip, ctx?.path);
+  console.log('ctx-ip:', ctx.ip, ctx.path);
 }
 
 /**
