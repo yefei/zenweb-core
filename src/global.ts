@@ -1,5 +1,6 @@
 import { Core } from './core';
 import { Context, CoreOption } from './types';
+import { callProxy } from './util';
 
 const CORE = Symbol.for('zenweb@core');
 
@@ -36,7 +37,7 @@ export function getCore(): Core | never {
  * @param force 默认 true 必须取得，如果无法取得则抛出异常
  */
 export function getContext(force?: true): Context | never;
-export function getContext(force?: false): Context | undefined;
+export function getContext(force: false): Context | undefined;
 export function getContext(force = true) {
   const ctx = getCore().app.ctxStorage?.getStore();
   if (force && !ctx) {
@@ -44,3 +45,13 @@ export function getContext(force = true) {
   }
   return ctx;
 }
+
+/**
+ * 快捷方式: Core 实例
+ */
+export const $core = callProxy(getCore);
+
+/**
+ * 快捷方式: 当前请求上下文
+ */
+export const $ctx = callProxy<Context>(getContext);
