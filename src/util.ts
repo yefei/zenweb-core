@@ -25,8 +25,30 @@ export function getStackLocation(stackIndex = 3) {
  */
 export function callProxy<T extends object>(call: () => T) {
   return new Proxy({} as T, {
-    //@ts-ignore
+    getPrototypeOf() {
+      return Object.getPrototypeOf(call());
+    },
+    setPrototypeOf(target, v) {
+      return Object.setPrototypeOf(call(), v);
+    },
+    isExtensible() {
+      return Object.isExtensible(call());
+    },
+    preventExtensions() {
+      return <any> Object.preventExtensions(call());
+    },
+    getOwnPropertyDescriptor(target, p) {
+      return Object.getOwnPropertyDescriptor(call(), p);
+    },
+    defineProperty(target, property, attributes) {
+      return <any> Object.defineProperty(call(), property, attributes);
+    },
+    has(target, p) {
+      const ins = call();
+      return p in ins;
+    },
     get(target, p, receiver) {
+      console.log({ target })
       const ins = call();
       if (p in ins) {
         const _p: Function | unknown = (<any>ins)[p];
@@ -36,10 +58,17 @@ export function callProxy<T extends object>(call: () => T) {
         return _p;
       }
     },
-    //@ts-ignore
-    has(target, p) {
+    set(target, p, newValue, receiver) {
       const ins = call();
-      return p in ins;
+      (<any>ins)[p] = newValue;
+      return true;
+    },
+    deleteProperty(target, p) {
+      const ins = call();
+      return delete (<any>ins)[p];
+    },
+    ownKeys() {
+      return Reflect.ownKeys(call());
     },
   });
 }

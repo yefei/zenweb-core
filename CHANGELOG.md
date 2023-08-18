@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.1.1] - 2023-8-18
+- 完善 callProxy 其他代理
+
 ## [4.1.0] - 2023-8-10
 - 新增 callProxy 方法实现 $core $ctx 全局变量
 
