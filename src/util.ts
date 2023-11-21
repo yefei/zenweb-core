@@ -48,7 +48,6 @@ export function callProxy<T extends object>(call: () => T) {
       return p in ins;
     },
     get(target, p, receiver) {
-      console.log({ target })
       const ins = call();
       if (p in ins) {
         const _p: Function | unknown = (<any>ins)[p];

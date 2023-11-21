@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.1.2] - 2023-11-21
+- remove: callProxy console.log({ target })
+
 ## [4.1.1] - 2023-8-18
 - 完善 callProxy 其他代理
 
