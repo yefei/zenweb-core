@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.1.4] - 2024-1-3
+- optionalDependencies
+
 ## [4.1.3] - 2024-1-3
 - 规范 type
 
