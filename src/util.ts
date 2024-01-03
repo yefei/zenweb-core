@@ -1,9 +1,18 @@
 import Debug from 'debug';
 
 /**
- * debug
+ * zenweb debug
  */
-export const debug = Debug('zenweb');
+export const debug = createDebug('zenweb');
+
+/**
+ * 创建一个 debug 对象
+ * @param namespace 命名空间
+ * @returns 
+ */
+export function createDebug(namespace: string) {
+  return Debug(namespace);
+}
 
 /**
  * 取得调用栈中位置信息，例如文件位置

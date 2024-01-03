@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.2.0] - 2024-1-3
+- util.createDebug
+
 ## [4.1.4] - 2024-1-3
 - optionalDependencies
 
