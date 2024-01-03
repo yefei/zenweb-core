@@ -1,5 +1,5 @@
 import { Core } from './core';
-import type { Context, CoreOption } from './types';
+import { Context, CoreOption } from './types';
 import { callProxy } from './util';
 
 declare global {

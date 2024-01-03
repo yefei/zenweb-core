@@ -1,7 +1,7 @@
-import type { AsyncLocalStorage } from 'async_hooks';
-import type * as koa from 'koa';
-import type { Core } from './core';
-import type { SetupHelper } from './setup';
+import { AsyncLocalStorage } from 'async_hooks';
+import * as koa from 'koa';
+import { Core } from './core';
+import { SetupHelper } from './setup';
 
 export type State = koa.DefaultState;
 
