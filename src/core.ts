@@ -1,7 +1,7 @@
 import * as koa from 'koa';
-import { Server, createServer } from 'http';
+import { type Server, createServer } from 'http';
 import { hostname } from 'os';
-import { Application, CoreOption, LoadedModule, SetupFunction } from './types';
+import type { Application, CoreOption, LoadedModule, SetupFunction } from './types';
 import { debug, getStackLocation } from './util';
 import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup';
 

@@ -13,3 +13,4 @@ run/
 .npmrc
 dist/
 thunder-tests/
+pnpm-lock.yaml

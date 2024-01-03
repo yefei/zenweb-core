@@ -1,20 +1,21 @@
 import { Core } from './core';
-import { Context, CoreOption } from './types';
+import type { Context, CoreOption } from './types';
 import { callProxy } from './util';
 
-const CORE = Symbol.for('zenweb@core');
+declare global {
+  var __zenweb_core: Core;
+}
 
 /**
  * 初始化全局 Core 实例
  * - 如果实例已经存在则抛出异常
  * - 全局实例默认启用 `asyncLocalStorage`
  */
-export function initCore(opt?: CoreOption): Core | never {
-  if (CORE in global) {
+export function initCore(opt?: CoreOption) {
+  if (globalThis.__zenweb_core) {
     throw new Error('Core instance already exists.');
   }
-  //@ts-ignore
-  return global[CORE] = new Core({
+  return globalThis.__zenweb_core = new Core({
     asyncLocalStorage: true,
     ...opt,
   });
@@ -24,12 +25,11 @@ export function initCore(opt?: CoreOption): Core | never {
  * 取得全局 Core 实例
  * - 如果无法取得则抛出异常
  */
-export function getCore(): Core | never {
-  if (!(CORE in global)) {
+export function getCore() {
+  if (!globalThis.__zenweb_core) {
     throw new Error('Core instance not exists.');
   }
-  //@ts-ignore
-  return global[CORE];
+  return globalThis.__zenweb_core;
 }
 
 /**

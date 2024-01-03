@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.1.3] - 2024-1-3
+- 规范 type
+
 ## [4.1.2] - 2023-11-21
 - remove: callProxy console.log({ target })
 
