@@ -1,4 +1,6 @@
-import Debug from 'debug';
+import Debug, { Debugger as _Debugger } from 'debug';
+
+export type Debugger = _Debugger;
 
 /**
  * zenweb debug
@@ -10,7 +12,7 @@ export const debug = createDebug('zenweb');
  * @param namespace 命名空间
  * @returns 
  */
-export function createDebug(namespace: string) {
+export function createDebug(namespace: string): Debugger {
   return Debug(namespace);
 }
 

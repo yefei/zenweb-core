@@ -1,7 +1,6 @@
-import { Debugger } from 'debug';
 import { Core } from './core';
 import { Application, Context, Middleware, SetupAfterFunction, SetupDestroyFunction } from './types';
-import { debug } from './util';
+import { debug, Debugger } from './util';
 
 export const SETUP_AFTER = Symbol('zenweb#setupAfter');
 export const SETUP_DESTROY = Symbol('zenweb#setupDestroy');
