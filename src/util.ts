@@ -8,7 +8,15 @@ export type Debugger = _Debugger;
 export const debug = createDebug('zenweb');
 
 /**
- * 创建一个 debug 对象
+ * 扩展 zenweb debug
+ * @param namespace 命名空间
+ */
+export function zenwebDebug(namespace?: string): Debugger {
+  return namespace ? debug.extend(namespace) : debug;
+}
+
+/**
+ * 创建一个新的 debug 对象
  * @param namespace 命名空间
  * @returns 
  */

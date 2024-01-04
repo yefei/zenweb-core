@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.2.2] - 2024-1-4
+- util.zenwebDebug
+
 ## [4.2.0] - 2024-1-3
 - util.createDebug
 
