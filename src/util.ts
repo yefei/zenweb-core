@@ -1,6 +1,9 @@
 import Debug, { Debugger as _Debugger } from 'debug';
 
-export type Debugger = _Debugger;
+// fix typescript import('debug')
+export interface Debugger extends _Debugger {
+  extend: (namespace: string, delimiter?: string) => Debugger;
+};
 
 /**
  * zenweb debug
