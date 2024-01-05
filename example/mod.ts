@@ -22,9 +22,10 @@ export default function (opt?: MyModOption): SetupFunction {
       testContext();
       ctx.body = 'ok';
       $debug('ddd');
-      console.log('==========');
-      $debug.extend('ext')('debug ext');
-      $debug.extend('aaa').extend('bbb')('debug ext');
+      console.log('$debug.enabled:', $debug.enabled);
+      const extDebug = $debug.extend('ext');
+      extDebug('debug ext');
+      console.log('extDebug.enabled:', extDebug.enabled);
       return next();
     });
     setup.after(() => {

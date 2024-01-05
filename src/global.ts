@@ -56,45 +56,45 @@ export const $core = callProxy(getCore);
  */
 export const $ctx = callProxy<Context>(getContext);
 
-/**
- * 带有 Context(如果有的话) 信息的 debug 输出
- */
-export const $debug = createDebug('app');
-const _origDebug = $debug.log;
-$debug.log = function (...args) {
-  const stack = getStackLocation();
-  args.unshift(stack);
-  const ctx = getContext(false);
-  if (ctx) {
-    args.unshift(`${ctx.method} ${$ctx.path}`);
-  }
-  console.log(...args);
-};
+// 带有调试信息的 debug
 
-/**
- * 带有 Context(如果有的话) 信息的 debug 输出
- */
-/*
-export function $debug(formatter: any, ...args: any[]) {
-  const self = this || _ctxDebug;
-  if (!self.enabled) return;
-  const stack = getStackLocation();
+function _ctxDebugOutput(debug: Debugger, formatter: any, args: any[]) {
+  if (!debug.enabled) return;
+  const stack = getStackLocation(4);
   formatter = `${stack}\n${formatter}`;
   const ctx = getContext(false);
   if (ctx) {
     formatter = `${ctx.method} ${$ctx.path}\n${formatter}`;
   }
-  self(formatter, ...args);
+  debug(formatter, ...args);
 }
-*/
+
+const _ctxDebug = createDebug('app');
+
+/**
+ * 带有请求信息(如果有的话)和所在行数的 debug 输出
+ */
+export function $debug(formatter: any, ...args: any[]) {
+  _ctxDebugOutput(_ctxDebug, formatter, args);
+}
+
+/**
+ * 是否启用
+ */
+$debug.enabled = _ctxDebug.enabled;
 
 /**
  * 扩展 $debug 命名空间
  * @param namespace 
  */
-/*
-$debug.extend = function (namespace: string, delimiter?: string) {
-  const self = _ctxDebug.extend(namespace, delimiter);
-  return $debug.bind(self);
+$debug.extend = function (namespace: string) {
+  const debug = _ctxDebug.extend(namespace);
+  function output(formatter: any, ...args: any[]) {
+    _ctxDebugOutput(debug, formatter, args);
+  }
+  output.enabled = debug.enabled;
+  output.extend = function (_namespace: string) {
+    return $debug.extend(namespace + ':' + _namespace);
+  }
+  return output as typeof $debug;
 }
-*/
