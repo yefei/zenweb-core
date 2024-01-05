@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.3.0] - 2024-1-5
+- 新增 $debug 方法
+
 ## [4.2.2] - 2024-1-4
 - util.zenwebDebug
 
