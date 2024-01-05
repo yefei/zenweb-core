@@ -21,11 +21,16 @@ export default function (opt?: MyModOption): SetupFunction {
       // console.log('request:', ctx.path, 'core prop:', ctx.core.mymod);
       testContext();
       ctx.body = 'ok';
+      // $debug
       $debug('ddd');
       console.log('$debug.enabled:', $debug.enabled);
       const extDebug = $debug.extend('ext');
       extDebug('debug ext');
       console.log('extDebug.enabled:', extDebug.enabled);
+      const ext2Debug = extDebug.extend('ext2');
+      ext2Debug('debug ext2');
+      console.log('ext2Debug.enabled:', ext2Debug.enabled);
+      
       return next();
     });
     setup.after(() => {

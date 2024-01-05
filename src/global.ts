@@ -85,16 +85,17 @@ $debug.enabled = _ctxDebug.enabled;
 
 /**
  * 扩展 $debug 命名空间
- * @param namespace 
+ * @param namespace 命名
+ * @param delimiter 分隔符，默认 :
  */
-$debug.extend = function (namespace: string) {
-  const debug = _ctxDebug.extend(namespace);
+$debug.extend = function (namespace: string, delimiter?: string) {
+  const debug = _ctxDebug.extend(namespace, delimiter);
   function output(formatter: any, ...args: any[]) {
     _ctxDebugOutput(debug, formatter, args);
   }
   output.enabled = debug.enabled;
   output.extend = function (_namespace: string) {
-    return $debug.extend(namespace + ':' + _namespace);
+    return $debug.extend(namespace + (delimiter || ':') + _namespace);
   }
   return output as typeof $debug;
 }
