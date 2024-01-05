@@ -1,4 +1,4 @@
-import { $ctx, SetupFunction } from '../src/index';
+import { $ctx, $debug, SetupFunction } from '../src/index';
 
 export interface MyModOption {}
 
@@ -21,6 +21,10 @@ export default function (opt?: MyModOption): SetupFunction {
       // console.log('request:', ctx.path, 'core prop:', ctx.core.mymod);
       testContext();
       ctx.body = 'ok';
+      $debug('ddd');
+      console.log('==========');
+      $debug.extend('ext')('debug ext');
+      $debug.extend('aaa').extend('bbb')('debug ext');
       return next();
     });
     setup.after(() => {
