@@ -43,6 +43,7 @@ export type Next = koa.Next;
  */
 export interface Application extends koa<State, Context> {
   ctxStorage: AsyncLocalStorage<Context> | undefined;
+  readonly currentContext: Context | undefined;
 }
 
 export interface CoreOption {
