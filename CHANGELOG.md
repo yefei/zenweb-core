@@ -1,5 +1,8 @@
 # Changelog
 
+## [4.3.1] - 2024-1-9
+- 兼容新的 @types/koa ctxStorage
+
 ## [4.3.0] - 2024-1-5
 - 新增 $debug 方法
 

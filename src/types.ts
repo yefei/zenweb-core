@@ -22,6 +22,12 @@ export interface Context extends koa.ParameterizedContext<State, koa.DefaultCont
   core: Core;
 }
 
+declare module 'koa' {
+  interface Context {
+    core: Core;
+  }
+}
+
 /**
  * 中间件方法
  */
@@ -36,7 +42,7 @@ export type Next = koa.Next;
  * koa 应用实例
  */
 export interface Application extends koa<State, Context> {
-  ctxStorage?: AsyncLocalStorage<Context>;
+  ctxStorage: AsyncLocalStorage<Context> | undefined;
 }
 
 export interface CoreOption {
