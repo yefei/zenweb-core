@@ -190,7 +190,7 @@ export class Core {
 
     // 停止监听
     console.log('close listen...');
-    await this.closeListen().catch(e => console.error('close listen error:', e));
+    const closing =  this.closeListen().catch(e => console.error('close listen error:', e));
 
     // 停止模块
     console.log('destroy modules...');
@@ -206,6 +206,8 @@ export class Core {
         console.error(`module [${name}] (${location}) destroy error:`, err);
       }
     }
+
+    await closing;
 
     // 退出
     console.log('server stopped');
