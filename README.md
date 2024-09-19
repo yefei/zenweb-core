@@ -38,9 +38,11 @@
 
 | 名称  | 功能 |
 | ----- | ---- |
-| initCore | 初始化全局 Core 对象
-| getCore | 取得全局 Core 对象
-| getContext | 取得当前请求上下文对象
+| $initCore | 初始化全局 Core 对象
+| $getCore | 取得全局 Core 对象
+| $getContext | 取得当前请求上下文对象
+| $core | 等于 $getCore()
+| $ctx | 等于 $getContext(true)
 
 ## 自定义模块入口样例代码
 

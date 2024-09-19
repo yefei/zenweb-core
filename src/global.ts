@@ -11,7 +11,7 @@ declare global {
  * - 如果实例已经存在则抛出异常
  * - 全局实例默认启用 `asyncLocalStorage`
  */
-export function initCore(opt?: CoreOption) {
+export function $initCore(opt?: CoreOption) {
   if (globalThis.__zenweb_core) {
     throw new Error('Core instance already exists.');
   }
@@ -25,7 +25,7 @@ export function initCore(opt?: CoreOption) {
  * 取得全局 Core 实例
  * - 如果无法取得则抛出异常
  */
-export function getCore() {
+export function $getCore() {
   if (!globalThis.__zenweb_core) {
     throw new Error('Core instance not exists.');
   }
@@ -36,10 +36,10 @@ export function getCore() {
  * 取得当前请求上下文
  * @param force 默认 true 必须取得，如果无法取得则抛出异常
  */
-export function getContext(force?: true): Context | never;
-export function getContext(force: false): Context | undefined;
-export function getContext(force = true) {
-  const ctx = getCore().app.ctxStorage?.getStore();
+export function $getContext(force?: true): Context | never;
+export function $getContext(force: false): Context | undefined;
+export function $getContext(force = true) {
+  const ctx = $getCore().app.ctxStorage?.getStore();
   if (force && !ctx) {
     throw new Error('Context instance not exists.');
   }
@@ -49,12 +49,12 @@ export function getContext(force = true) {
 /**
  * 快捷方式: Core 实例
  */
-export const $core = callProxy(getCore);
+export const $core = callProxy($getCore);
 
 /**
  * 快捷方式: 当前请求上下文
  */
-export const $ctx = callProxy<Context>(getContext);
+export const $ctx = callProxy<Context>($getContext);
 
 // 带有调试信息的 debug
 
@@ -62,7 +62,7 @@ function _ctxDebugOutput(debug: Debugger, formatter: any, args: any[]) {
   if (!debug.enabled) return;
   const stack = getStackLocation(4);
   formatter = `${stack}\n${formatter}`;
-  const ctx = getContext(false);
+  const ctx = $getContext(false);
   if (ctx) {
     formatter = `${ctx.method} ${$ctx.path}\n${formatter}`;
   }
