@@ -1,7 +1,7 @@
 {
   "name": "@zenweb/core",
   "packageManager": "yarn@4.0.2",
-  "version": "4.3.2",
+  "version": "5.0.0",
   "description": "ZenWeb Core Module - Module loader and Server",
   "exports": "./dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -36,10 +36,10 @@
   },
   "dependencies": {
     "debug": "^4.3.3",
-    "koa": "^2.14.2"
+    "koa": "^2.15.3"
   },
   "optionalDependencies": {
     "@types/debug": "^4.1.7",
-    "@types/koa": "^2.14.0"
+    "@types/koa": "^2.15.0"
   }
 }
