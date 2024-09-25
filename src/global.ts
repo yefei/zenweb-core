@@ -13,7 +13,7 @@ declare global {
  */
 export function $initCore(opt?: CoreOption) {
   if (globalThis.__zenweb_core) {
-    throw new Error('Core instance already exists.');
+    throw new Error('Global @zenweb/core instance already exists.');
   }
   return globalThis.__zenweb_core = new Core({
     asyncLocalStorage: true,
@@ -27,7 +27,7 @@ export function $initCore(opt?: CoreOption) {
  */
 export function $getCore() {
   if (!globalThis.__zenweb_core) {
-    throw new Error('Core instance not exists.');
+    throw new Error('Global @zenweb/core instance not exists.');
   }
   return globalThis.__zenweb_core;
 }

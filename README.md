@@ -43,6 +43,7 @@
 | $getContext | 取得当前请求上下文对象
 | $core | 等于 $getCore()
 | $ctx | 等于 $getContext(true)
+| $debug | 输出 debug 信息支持上下文请求并打印所在行信息
 
 ## 自定义模块入口样例代码
 

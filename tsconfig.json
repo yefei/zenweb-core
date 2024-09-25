@@ -5,6 +5,7 @@
     "module": "commonjs",
     "strict": true,
     "declaration": true,
+    "noUnusedLocals": true,
     "newLine": "lf",
     "outDir": "./dist"
   },
