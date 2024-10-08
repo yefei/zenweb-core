@@ -1,6 +1,6 @@
-import { Core } from './core';
-import { Context, CoreOption } from './types';
-import { Debugger, callProxy, createDebug, getStackLocation } from './util';
+import { Core } from './core.js';
+import { Context, CoreOption } from './types.js';
+import { Debugger, callProxy, createDebug, getStackLocation } from './util.js';
 
 declare global {
   var __zenweb_core: Core;

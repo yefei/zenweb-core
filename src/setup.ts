@@ -1,6 +1,6 @@
-import { Core } from './core';
-import { Application, Context, Middleware, SetupAfterFunction, SetupDestroyFunction } from './types';
-import { debug, Debugger } from './util';
+import { Core } from './core.js';
+import { Application, Context, Middleware, SetupAfterFunction, SetupDestroyFunction } from './types.js';
+import { debug, Debugger } from './util.js';
 
 export const SETUP_AFTER = Symbol('zenweb#setupAfter');
 export const SETUP_DESTROY = Symbol('zenweb#setupDestroy');

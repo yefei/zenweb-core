@@ -1,9 +1,9 @@
-import * as koa from 'koa';
-import { Server, createServer } from 'http';
-import { hostname } from 'os';
-import { Application, CoreOption, LoadedModule, SetupFunction } from './types';
-import { debug, getStackLocation } from './util';
-import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup';
+import koa from 'koa';
+import { Server, createServer } from 'node:http';
+import { hostname } from 'node:os';
+import { Application, CoreOption, LoadedModule, SetupFunction } from './types.js';
+import { debug, getStackLocation } from './util.js';
+import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup.js';
 
 export class Core {
   /**

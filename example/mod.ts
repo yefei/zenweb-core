@@ -1,4 +1,4 @@
-import { $ctx, $debug, SetupFunction } from '../src/index';
+import { $ctx, $debug, SetupFunction } from '../src/index.js';
 
 export interface MyModOption {}
 

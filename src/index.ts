@@ -1,8 +1,8 @@
-import { Core } from './core';
-import { SetupHelper } from './setup';
-export * from './util';
-export * from './types';
-export * from './global';
+import { Core } from './core.js';
+import { SetupHelper } from './setup.js';
+export * from './util.js';
+export * from './types.js';
+export * from './global.js';
 
 export {
   Core,

@@ -1,5 +1,5 @@
-import { $initCore } from '../src/index';
-import mymod from './mod';
+import { $initCore } from '../src/index.js';
+import mymod from './mod.js';
 
 $initCore()
 .setup(mymod())
