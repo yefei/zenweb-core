@@ -89,12 +89,22 @@ export type SetupFunction = (setup: SetupHelper) => void | Promise<void>;
 export type SetupAfterFunction = () => void | Promise<void>;
 export type SetupDestroyFunction = () => void | Promise<void>;
 
-export interface LoadedModule {
+export interface SetupOption {
   /**
    * 模块名称
+   * - 不指定则取模块函数名
    */
-  name: string;
+  name?: string;
 
+  /**
+   * 模块加载顺序
+   * - 顺序按照从小到大排序
+   * - 在安装模块时如果没有指定会自动根据代码顺序自增
+   */
+  order?: number;
+}
+
+export interface LoadedModule extends Required<SetupOption> {
   /**
    * 模块安装函数
    */

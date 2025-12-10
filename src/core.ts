@@ -1,7 +1,7 @@
 import koa from 'koa';
 import { Server, createServer } from 'node:http';
 import { hostname } from 'node:os';
-import { Application, CoreOption, LoadedModule, SetupFunction } from './types.js';
+import { Application, CoreOption, LoadedModule, SetupFunction, SetupOption } from './types.js';
 import { debug, getStackLocation } from './util.js';
 import { SetupHelper, SETUP_AFTER, SETUP_DESTROY } from './setup.js';
 
@@ -42,6 +42,11 @@ export class Core {
    */
   private _stopping = false;
 
+  /**
+   * 当前已加载模块顺序值
+   */
+  private _orderIndex = 1;
+
   constructor(option?: CoreOption) {
     this.app = new koa(option);
     Object.defineProperty(this.app.context, 'core', { value: this });
@@ -51,17 +56,24 @@ export class Core {
   /**
    * 安装模块
    * @param setup 模块模块安装函数
-   * @param name 自定义模块名称，不指定则取模块内置名称
+   * @param opt 安装选项
    */
-  setup(setup: SetupFunction, name?: string) {
-    name = name || setup.name;
+  setup(setup: SetupFunction, opt?: SetupOption) {
+    const name = opt?.name || setup.name;
     const location = getStackLocation();
     if (!name) {
       throw new Error('Missing module name: ' + location);
     }
-    this.debug('module [%s] loaded', name);
+    if (typeof opt?.order !== 'number') {
+      var order = this._orderIndex * 100;
+      this._orderIndex++;
+    } else {
+      var order = opt.order;
+    }
+    this.debug('module [%s] loaded, order: %d', name, order);
     this.loadedModules.push({
       name,
+      order,
       setup,
       location,
       helper: new SetupHelper(this, name),
@@ -78,11 +90,19 @@ export class Core {
   }
 
   /**
+   * 取得已排序的模块列表
+   */
+  getOrderedModules() {
+    return this.loadedModules.sort((a, b) => a.order - b.order);
+  }
+
+  /**
    * 启动所有模块代码
    */
   async boot() {
+    const modules = this.getOrderedModules();
     // 初始化模块
-    for (const { name, setup, helper, location } of this.loadedModules) {
+    for (const { name, setup, helper, location } of modules) {
       helper.debug('setup');
       try {
         await setup(helper);
@@ -93,7 +113,7 @@ export class Core {
       helper.debug('setup success');
     }
     // 所有模块初始化完成后调用
-    for (const { name, helper, location } of this.loadedModules) {
+    for (const { name, helper, location } of modules) {
       if (!helper[SETUP_AFTER]) {
         continue;
       }
@@ -194,7 +214,8 @@ export class Core {
 
     // 停止模块
     console.log('destroy modules...');
-    for (const { name, helper, location } of this.loadedModules.reverse()) {
+    const modules = this.getOrderedModules().reverse();
+    for (const { name, helper, location } of modules) {
       if (!helper[SETUP_DESTROY]) {
         continue;
       }
