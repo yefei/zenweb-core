@@ -61,6 +61,10 @@ export const $ctx = callProxy<Context>($getContext);
 function _ctxDebugOutput(debug: Debugger, formatter: any, args: any[]) {
   if (!debug.enabled) return;
   const stack = getStackLocation(4);
+  if (typeof formatter === 'object') {
+    args.unshift(formatter);
+    formatter = '%o';
+  }
   formatter = `${stack}\n${formatter}`;
   const ctx = $getContext(false);
   if (ctx) {

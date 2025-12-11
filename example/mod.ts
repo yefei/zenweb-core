@@ -30,6 +30,8 @@ export default function (opt?: MyModOption): SetupFunction {
       const ext2Debug = extDebug.extend('ext2');
       ext2Debug('debug ext2');
       console.log('ext2Debug.enabled:', ext2Debug.enabled);
+
+      $debug({ obj: 'Hello', test: 111 });
       
       return next();
     });
